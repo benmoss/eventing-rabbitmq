@@ -128,6 +128,26 @@ var (
 	}
 )
 
+func makeSubscriberAddressableAsUnstructured() *unstructured.Unstructured {
+	// TODO: ok, creating a knative service in the tests somehow makes it a
+	// valid thing to lookup, how should we do this in a non hacky way though
+	return &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": deadLetterSinkAPIVersion,
+			"kind":       deadLetterSinkKind,
+			"metadata": map[string]interface{}{
+				"namespace": "bar",
+				"name":      "bar",
+			},
+			"status": map[string]interface{}{
+				"address": map[string]interface{}{
+					"url": "bar",
+				},
+			},
+		},
+	}
+}
+
 func init() {
 	// Add types to scheme
 	_ = eventingv1.AddToScheme(scheme.Scheme)
@@ -940,6 +960,7 @@ func TestReconcile(t *testing.T) {
 			Name: "Exchange created with unresolvable delivery, DLQ dispatcher fails",
 			Key:  testKey,
 			Objects: []runtime.Object{
+				makeSubscriberAddressableAsUnstructured(),
 				NewBroker(brokerName, testNS,
 					WithBrokerUID(brokerUID),
 					WithBrokerClass(brokerClass),

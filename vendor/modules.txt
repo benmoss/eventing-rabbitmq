@@ -984,7 +984,7 @@ k8s.io/utils/buffer
 k8s.io/utils/integer
 k8s.io/utils/pointer
 k8s.io/utils/trace
-# knative.dev/eventing v0.26.0
+# knative.dev/eventing v0.26.0 => ../eventing
 ## explicit
 knative.dev/eventing/pkg/adapter/v2
 knative.dev/eventing/pkg/adapter/v2/util/crstatusevent
@@ -1254,3 +1254,4 @@ sigs.k8s.io/structured-merge-diff/v4/value
 sigs.k8s.io/yaml
 # github.com/NeowayLabs/wabbit => github.com/vaikas/wabbit v0.0.0-20201002085521-b5b22698ecc7
 # github.com/docker/docker => github.com/docker/engine v0.0.0-20190717161051-705d9623b7c1
+# knative.dev/eventing => ../eventing

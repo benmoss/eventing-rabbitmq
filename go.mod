@@ -43,3 +43,5 @@ replace (
 
 	github.com/docker/docker => github.com/docker/engine v0.0.0-20190717161051-705d9623b7c1
 )
+
+replace knative.dev/eventing => ../eventing
