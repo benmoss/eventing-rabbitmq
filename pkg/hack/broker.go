@@ -36,10 +36,10 @@ type Channel interface {
 	QueueBind(args QueueBindArgs) error
 
 	// delete a queue
-	QueueDelete(name string)
+	QueueDelete(name string) error
 
 	// delete an exchange
-	ExchangeDelete(name string)
+	ExchangeDelete(name string) error
 }
 
 /*
