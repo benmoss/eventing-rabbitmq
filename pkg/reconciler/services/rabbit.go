@@ -22,27 +22,75 @@ import (
 
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/equality"
+	"k8s.io/apimachinery/pkg/api/errors"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/discovery"
+	restclient "k8s.io/client-go/rest"
 	"knative.dev/eventing-rabbitmq/pkg/reconciler/broker/resources"
 	triggerresources "knative.dev/eventing-rabbitmq/pkg/reconciler/trigger/resources"
 	"knative.dev/eventing-rabbitmq/third_party/pkg/apis/rabbitmq.com/v1beta1"
 	rabbitclientset "knative.dev/eventing-rabbitmq/third_party/pkg/client/clientset/versioned"
-	rabbitmqclient "knative.dev/eventing-rabbitmq/third_party/pkg/client/injection/client"
-	bindinginformer "knative.dev/eventing-rabbitmq/third_party/pkg/client/injection/informers/rabbitmq.com/v1beta1/binding"
-	exchangeinformer "knative.dev/eventing-rabbitmq/third_party/pkg/client/injection/informers/rabbitmq.com/v1beta1/exchange"
-	queueinformer "knative.dev/eventing-rabbitmq/third_party/pkg/client/injection/informers/rabbitmq.com/v1beta1/queue"
+	versioned "knative.dev/eventing-rabbitmq/third_party/pkg/client/clientset/versioned"
+	factory "knative.dev/eventing-rabbitmq/third_party/pkg/client/injection/informers/factory"
 	rabbitlisters "knative.dev/eventing-rabbitmq/third_party/pkg/client/listers/rabbitmq.com/v1beta1"
+	"knative.dev/pkg/injection"
 	"knative.dev/pkg/logging"
 )
 
-func NewRabbit(ctx context.Context) *Rabbit {
-	return &Rabbit{
-		rabbitClientSet: rabbitmqclient.Get(ctx),
-		exchangeLister:  exchangeinformer.Get(ctx).Lister(),
-		queueLister:     queueinformer.Get(ctx).Lister(),
-		bindingLister:   bindinginformer.Get(ctx).Lister(),
+const (
+	messagingGroupVersion = "rabbitmq.com/v1beta1"
+	messagingExchangeKind = "Exchange"
+)
+
+type RabbitService interface {
+	ReconcileExchange(context.Context, *resources.ExchangeArgs) (*v1beta1.Exchange, error)
+	ReconcileQueue(context.Context, *triggerresources.QueueArgs) (*v1beta1.Queue, error)
+	ReconcileBinding(context.Context, *triggerresources.BindingArgs) (*v1beta1.Binding, error)
+}
+
+func NewRabbit(ctx context.Context) RabbitService {
+	cfg := injection.GetConfig(ctx)
+
+	var useCRDs bool
+	client := discovery.NewDiscoveryClientForConfigOrDie(cfg)
+	resources, err := client.ServerResourcesForGroupVersion(messagingGroupVersion)
+	if errors.IsNotFound(err) {
+		logging.FromContext(ctx).Info("rabbitmq resource group not found, defaulting to standalone mode")
+		return NewStandaloneRabbit(ctx)
+	} else if errors.IsForbidden(err) {
+		logging.FromContext(ctx).Error("unable to view installed resources")
+		panic(err)
+	} else if err != nil {
+		logging.FromContext(ctx).Errorw("unknown error", zap.Error(err))
+		panic(err)
 	}
+	for _, resource := range resources.APIResources {
+		if resource.Kind == messagingExchangeKind {
+			useCRDs = true
+		}
+	}
+	if useCRDs {
+		return NewManagedRabbit(ctx, cfg)
+	} else {
+		return NewStandaloneRabbit(ctx)
+	}
+}
+
+func NewManagedRabbit(ctx context.Context, cfg *restclient.Config) *ManagedRabbit {
+	rabbitClientSet := versioned.NewForConfigOrDie(cfg)
+	rabbit := factory.Get(ctx).Rabbitmq().V1beta1()
+
+	return &ManagedRabbit{
+		rabbitClientSet: rabbitClientSet,
+		exchangeLister:  rabbit.Exchanges().Lister(),
+		queueLister:     rabbit.Queues().Lister(),
+		bindingLister:   rabbit.Bindings().Lister(),
+	}
+}
+
+func NewStandaloneRabbit(ctx context.Context) *StandaloneRabbit {
+	return nil
 }
 
 func NewRabbitTest(
@@ -50,9 +98,9 @@ func NewRabbitTest(
 	exchangeLister rabbitlisters.ExchangeLister,
 	queueLister rabbitlisters.QueueLister,
 	bindingLister rabbitlisters.BindingLister,
-) *Rabbit {
+) *ManagedRabbit {
 	// TODO(bmo): remove, use mocks
-	return &Rabbit{
+	return &ManagedRabbit{
 		rabbitClientSet: rabbitClientSet,
 		exchangeLister:  exchangeLister,
 		queueLister:     queueLister,
@@ -60,14 +108,14 @@ func NewRabbitTest(
 	}
 }
 
-type Rabbit struct {
+type ManagedRabbit struct {
 	rabbitClientSet rabbitclientset.Interface
 	exchangeLister  rabbitlisters.ExchangeLister
 	queueLister     rabbitlisters.QueueLister
 	bindingLister   rabbitlisters.BindingLister
 }
 
-func (r *Rabbit) ReconcileExchange(ctx context.Context, args *resources.ExchangeArgs) (*v1beta1.Exchange, error) {
+func (r *ManagedRabbit) ReconcileExchange(ctx context.Context, args *resources.ExchangeArgs) (*v1beta1.Exchange, error) {
 	logging.FromContext(ctx).Infow("Reconciling exchange", zap.String("name", args.Name))
 
 	want := resources.NewExchange(ctx, args)
@@ -86,7 +134,7 @@ func (r *Rabbit) ReconcileExchange(ctx context.Context, args *resources.Exchange
 	return current, nil
 }
 
-func (r *Rabbit) ReconcileQueue(ctx context.Context, args *triggerresources.QueueArgs) (*v1beta1.Queue, error) {
+func (r *ManagedRabbit) ReconcileQueue(ctx context.Context, args *triggerresources.QueueArgs) (*v1beta1.Queue, error) {
 	logging.FromContext(ctx).Info("Reconciling queue")
 
 	queueName := args.Name
@@ -106,7 +154,7 @@ func (r *Rabbit) ReconcileQueue(ctx context.Context, args *triggerresources.Queu
 	return current, nil
 }
 
-func (r *Rabbit) ReconcileBinding(ctx context.Context, args *triggerresources.BindingArgs) (*v1beta1.Binding, error) {
+func (r *ManagedRabbit) ReconcileBinding(ctx context.Context, args *triggerresources.BindingArgs) (*v1beta1.Binding, error) {
 	logging.FromContext(ctx).Info("Reconciling binding")
 
 	want, err := triggerresources.NewBinding(ctx, args)
@@ -126,4 +174,20 @@ func (r *Rabbit) ReconcileBinding(ctx context.Context, args *triggerresources.Bi
 		return r.rabbitClientSet.RabbitmqV1beta1().Bindings(args.Namespace).Update(ctx, desired, metav1.UpdateOptions{})
 	}
 	return current, nil
+}
+
+type StandaloneRabbit struct {
+}
+
+// TODO: make it work?
+func (r *StandaloneRabbit) ReconcileExchange(ctx context.Context, args *resources.ExchangeArgs) (*v1beta1.Exchange, error) {
+	return nil, nil
+}
+
+func (r *StandaloneRabbit) ReconcileQueue(ctx context.Context, args *triggerresources.QueueArgs) (*v1beta1.Queue, error) {
+	return nil, nil
+}
+
+func (r *StandaloneRabbit) ReconcileBinding(ctx context.Context, args *triggerresources.BindingArgs) (*v1beta1.Binding, error) {
+	return nil, nil
 }
