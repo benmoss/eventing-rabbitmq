@@ -6,3 +6,4 @@ updates:
     interval: "daily"
   ignore:
     - dependency-name: "k8s.io/*" # manually handle k8s bumps
+    - dependency-name: "knative.dev/*" # knobots handles knative bumps
