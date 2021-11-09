@@ -1,0 +1,30 @@
+### This workflow now has no secrets and a read-only token
+name: Dependabot Workflow
+on:
+  pull_request
+
+jobs:
+  dependabot:
+    strategy:
+      matrix:
+        go-version: [1.17.x]
+        platform: [ubuntu-latest]
+
+    runs-on: ${{ matrix.platform }}
+    # Always check the actor is Dependabot to prevent your workflow from failing on non-Dependabot PRs
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Go ${{ matrix.go-version }}
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+      id: go
+    - name: Update Codegen
+      shell: bash
+      run: ./hack/update-codegen.sh
+    - uses: EndBug/add-and-commit@v7
+      with:
+        author_name: "Knative Automation"
+        author_email: "automation@knative.team"
+        message: "Run hack/update-deps.sh"
