@@ -9,7 +9,6 @@ require (
 	github.com/docker/docker v1.13.1 // indirect
 	github.com/docker/go-connections v0.4.0
 	github.com/fsouza/go-dockerclient v1.6.5 // indirect
-	github.com/go-openapi/spec v0.19.7 // indirect
 	github.com/go-redis/redis v6.15.9+incompatible // indirect
 	github.com/google/go-cmp v0.5.6
 	github.com/google/licenseclassifier v0.0.0-20200708223521-3d09a0ea2f39
@@ -18,7 +17,7 @@ require (
 	github.com/michaelklishin/rabbit-hole/v2 v2.10.0
 	github.com/pkg/errors v0.9.1
 	github.com/rabbitmq/amqp091-go v0.0.0-20210921101955-bb8191b6c914
-	github.com/rabbitmq/cluster-operator v1.8.2
+	github.com/rabbitmq/cluster-operator v1.10.0
 	github.com/rabbitmq/messaging-topology-operator v0.11.0
 	github.com/testcontainers/testcontainers-go v0.7.0
 	github.com/tiago4orion/conjure v0.0.0-20150908101743-93cb30b9d218 // indirect
@@ -29,7 +28,7 @@ require (
 	k8s.io/apimachinery v0.21.4
 	k8s.io/client-go v0.21.4
 	k8s.io/code-generator v0.21.4
-	k8s.io/kube-openapi v0.0.0-20210305001622-591a79e4bda7
+	k8s.io/kube-openapi v0.0.0-20210421082810-95288971da7e
 	knative.dev/eventing v0.27.0
 	knative.dev/hack v0.0.0-20211101195839-11d193bf617b
 	knative.dev/pkg v0.0.0-20211101212339-96c0204a70dc
@@ -60,7 +59,7 @@ require (
 	github.com/emicklei/go-restful v2.9.5+incompatible // indirect
 	github.com/evanphx/json-patch v4.11.0+incompatible // indirect
 	github.com/evanphx/json-patch/v5 v5.5.0 // indirect
-	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-kit/log v0.1.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/go-logr/logr v0.4.0 // indirect
@@ -69,7 +68,7 @@ require (
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/gobuffalo/flect v0.2.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
+	github.com/golang/glog v0.0.0-20210429001901-424d2337a529 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-github/v27 v27.0.6 // indirect
@@ -105,14 +104,14 @@ require (
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rogpeppe/fastuuid v1.2.0 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
-	github.com/sirupsen/logrus v1.7.0 // indirect
+	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/tsenart/vegeta/v12 v12.8.4 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/automaxprocs v1.4.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/multierr v1.7.0 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
