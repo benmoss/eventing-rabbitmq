@@ -30,9 +30,9 @@ jobs:
         go install github.com/google/go-licenses@latest
     - name: Update Codegen
       shell: bash
-      run: ./hack/update-codegen.sh
+      run: ./hack/update-deps.sh && ./hack/update-codegen.sh
     - uses: EndBug/add-and-commit@v7
       with:
         author_name: "Knative Automation"
         author_email: "automation@knative.team"
-        message: "Run hack/update-deps.sh"
+        message: "Update codegen"
