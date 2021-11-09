@@ -23,7 +23,7 @@ require (
 	github.com/streadway/amqp v1.0.0
 	github.com/testcontainers/testcontainers-go v0.7.0
 	github.com/tiago4orion/conjure v0.0.0-20150908101743-93cb30b9d218 // indirect
-	go.uber.org/zap v1.16.0
+	go.uber.org/zap v1.19.1
 	gotest.tools v2.2.0+incompatible
 	k8s.io/api v0.20.5
 	k8s.io/apiextensions-apiserver v0.20.2
