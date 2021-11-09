@@ -1,7 +1,11 @@
 ### This workflow now has no secrets and a read-only token
 name: Dependabot Workflow
 on:
-  pull_request
+  pull_request_target
+
+permissions:
+  contents: write
+
 
 jobs:
   dependabot:
