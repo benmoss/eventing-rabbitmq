@@ -9,7 +9,6 @@ require (
 	github.com/docker/docker v1.13.1 // indirect
 	github.com/docker/go-connections v0.4.0
 	github.com/fsouza/go-dockerclient v1.6.5 // indirect
-	github.com/go-openapi/spec v0.19.7 // indirect
 	github.com/go-redis/redis v6.15.9+incompatible // indirect
 	github.com/google/go-cmp v0.5.6
 	github.com/google/licenseclassifier v0.0.0-20200708223521-3d09a0ea2f39
@@ -26,10 +25,10 @@ require (
 	gotest.tools v2.2.0+incompatible
 	k8s.io/api v0.21.4
 	k8s.io/apiextensions-apiserver v0.21.4
-	k8s.io/apimachinery v0.21.4
+	k8s.io/apimachinery v0.22.3
 	k8s.io/client-go v0.21.4
 	k8s.io/code-generator v0.21.4
-	k8s.io/kube-openapi v0.0.0-20210305001622-591a79e4bda7
+	k8s.io/kube-openapi v0.0.0-20210421082810-95288971da7e
 	knative.dev/eventing v0.27.0
 	knative.dev/hack v0.0.0-20211101195839-11d193bf617b
 	knative.dev/pkg v0.0.0-20211101212339-96c0204a70dc
@@ -136,7 +135,7 @@ require (
 	k8s.io/component-base v0.21.4 // indirect
 	k8s.io/gengo v0.0.0-20210915205010-39e73c8a59cd // indirect
 	k8s.io/klog v1.0.0 // indirect
-	k8s.io/klog/v2 v2.8.0 // indirect
+	k8s.io/klog/v2 v2.9.0 // indirect
 	k8s.io/utils v0.0.0-20210722164352-7f3ee0f31471 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
