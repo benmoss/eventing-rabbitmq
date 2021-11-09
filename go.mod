@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/NeowayLabs/wabbit v0.0.0-20210927194032-73ad61d1620e
-	github.com/cloudevents/sdk-go/v2 v2.4.1
+	github.com/cloudevents/sdk-go/v2 v2.6.1
 	github.com/containerd/continuity v0.0.0-20200228182428-0f16d7a0959c
 	github.com/docker/docker v1.13.1 // indirect
 	github.com/docker/go-connections v0.4.0
