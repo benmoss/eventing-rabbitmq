@@ -4,3 +4,5 @@ updates:
   directory: "/"
   schedule:
     interval: "daily"
+  ignore:
+    - dependency-name: "k8s.io/*" # manually handle k8s bumps
