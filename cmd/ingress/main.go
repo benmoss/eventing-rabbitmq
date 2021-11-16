@@ -19,9 +19,11 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/binding"
@@ -43,8 +45,11 @@ type envConfig struct {
 	BrokerURL    string `envconfig:"BROKER_URL" required:"true"`
 	ExchangeName string `envconfig:"EXCHANGE_NAME" required:"true"`
 
-	channel *amqp.Channel
-	logger  *zap.SugaredLogger
+	channel  *amqp.Channel
+	confirms chan amqp.Confirmation
+	logger   *zap.SugaredLogger
+	counter  int
+	mut      sync.Mutex
 }
 
 func main() {
@@ -64,6 +69,9 @@ func main() {
 		log.Fatalf("failed to open a channel: %s", err)
 	}
 	defer env.channel.Close()
+
+	env.confirms = env.channel.NotifyPublish(make(chan amqp.Confirmation))
+	env.channel.Confirm(false)
 
 	env.logger = logging.FromContext(context.Background())
 
@@ -122,10 +130,17 @@ func (env *envConfig) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 }
 
 func (env *envConfig) send(event *cloudevents.Event) (int, error) {
+	env.mut.Lock()
+	defer env.mut.Unlock()
+
 	bytes, err := json.Marshal(event)
 	if err != nil {
+		env.logger.Info("failed to marshal event")
 		return http.StatusBadRequest, fmt.Errorf("failed to marshal event, %w", err)
 	}
+	env.counter++
+	logger := env.logger.With(zap.Int("counter", env.counter))
+	logger.Infow("publishing")
 	headers := amqp.Table{
 		"type":    event.Type(),
 		"source":  event.Source(),
@@ -144,7 +159,17 @@ func (env *envConfig) send(event *cloudevents.Event) (int, error) {
 			ContentType: "application/json",
 			Body:        bytes,
 		}); err != nil {
-		return http.StatusInternalServerError, fmt.Errorf("failed to publish message")
+		logger.Info("failed to publish message")
+		return http.StatusInternalServerError, errors.New("failed to publish message")
 	}
-	return http.StatusAccepted, nil
+	logger.Infow("waiting on the confirm")
+	confirmed := <-env.confirms
+	if confirmed.Ack {
+		logger.Infow("ack", zap.Uint64("delivery-tag", confirmed.DeliveryTag))
+		return http.StatusAccepted, nil
+	} else {
+		logger.Infow("nack", zap.Uint64("delivery-tag", confirmed.DeliveryTag))
+		return http.StatusServiceUnavailable, errors.New("message was not confirmed")
+	}
+
 }
