@@ -129,3 +129,7 @@ func main() {
 		logging.FromContext(ctx).Fatal("Failed to consume from queue: ", err)
 	}
 }
+
+func foo() {
+
+}
