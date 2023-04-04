@@ -7,7 +7,7 @@ require (
 	github.com/cloudevents/sdk-go/observability/opencensus/v2 v2.4.1
 	github.com/cloudevents/sdk-go/v2 v2.4.1
 	github.com/containerd/continuity v0.1.0
-	github.com/docker/docker v20.10.10+incompatible // indirect
+	github.com/docker/docker v20.10.24+incompatible // indirect
 	github.com/docker/go-connections v0.4.0
 	github.com/fsouza/go-dockerclient v1.6.5 // indirect
 	github.com/google/go-cmp v0.5.6
